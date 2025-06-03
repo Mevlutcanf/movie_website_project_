@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr"> <!-- Dil ayarını Türkçe olarak değiştirdik -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="../css/login.css">
+    <title>Giriş Sayfası</title> <!-- Başlık Türkçeleştirildi -->
+    <link rel="shortcut icon" type="image/png" href="../icon.png">
+    <!-- Firebase CDN'lerini ekleyin -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_z-ElsTCTD4xdL36upqHhsM78a2dej68",
+            authDomain: "moviedata-1d21c.firebaseapp.com",
+            projectId: "moviedata-1d21c",
+            storageBucket: "moviedata-1d21c.firebasestorage.app",
+            messagingSenderId: "888397376474",
+            appId: "1:888397376474:web:aae5cd9c0d68c9198f2ee3",
+            measurementId: "G-XJ64Z9JTP2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Giriş formu dinleyicisi
+        document.getElementById('sign-in-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.querySelector('#sign-in-form input[type="email"]').value;
+            const password = document.querySelector('#sign-in-form input[type="password"]').value;
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                localStorage.setItem('userEmail', user.email);
+                
+                if (email === 'admin@mail.com') {
+                    localStorage.setItem('isAdmin', 'true');
+                    window.location.replace('admin-panel.html');
+                    return;
+                } else {
+                    localStorage.setItem('isAdmin', 'false');
+                    window.location.replace('user.html');
+                }
+            } catch (error) {
+                console.error('Giriş hatası:', error);
+                alert('E-posta veya şifre hatalı!');
+            }
+        });
+
+        // Kayıt formu dinleyicisi
+        document.getElementById('sign-up-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.querySelector('#sign-up-form input[type="email"]').value;
+            const password = document.querySelector('#sign-up-form input[type="password"]').value;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Firestore'a kullanıcı bilgilerini kaydet
+                await setDoc(doc(db, "users", user.uid), {
+                    email: user.email,
+                    createdAt: new Date(),
+                    role: 'user',
+                    status: 'active'
+                });
+
+                localStorage.setItem('userEmail', user.email);
+                alert('Kayıt başarılı! Ana sayfaya yönlendiriliyorsunuz...');
+                window.location.href = 'user.html';
+            } catch (error) {
+                console.error('Kayıt hatası:', error);
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('Bu e-posta adresi zaten kullanımda!');
+                } else if (error.code === 'auth/weak-password') {
+                    alert('Şifre en az 6 karakter olmalıdır!');
+                } else {
+                    alert('Kayıt hatası: ' + error.message);
+                }
+            }
+        });
+
+        // Kullanıcı durumu değişikliğini dinle
+        // auth.onAuthStateChanged((user) => {
+        //     if (user) {
+        //         console.log('Aktif kullanıcı:', user.email);
+        //     } else {
+        //         console.log('Kullanıcı oturumu kapalı');
+        //     }
+        // });
+    </script>
+</head>
+
+<body>
+
+    <div class="container" id="container">
+        <div class="form-container sign-up">
+            <form id="sign-up-form">
+                <h1>Hesap Oluştur</h1> <!-- Başlık Türkçeleştirildi -->
+                <div class="social-icons">
+                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+                <span>veya kayıt için e-posta adresinizi kullanın</span> <!-- Açıklama Türkçeleştirildi -->
+                <input type="text" placeholder="İsim"> <!-- Placeholder Türkçeleştirildi -->
+                <input type="email" placeholder="E-posta"> <!-- Placeholder Türkçeleştirildi -->
+                <input type="password" placeholder="Şifre"> <!-- Placeholder Türkçeleştirildi -->
+                <button type="submit" id="sign-up-button">Kayıt Ol</button> <!-- Buton Türkçeleştirildi ve id eklendi -->
+            </form>
+        </div>
+        <div class="form-container sign-in">
+            <form id="sign-in-form">
+                <h1>Giriş Yap</h1> <!-- Başlık Türkçeleştirildi -->
+                <div class="social-icons">
+                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+                <span>veya e-posta ve şifrenizi kullanın</span> <!-- Açıklama Türkçeleştirildi -->
+                <input type="email" placeholder="E-posta"> <!-- Placeholder Türkçeleştirildi -->
+                <input type="password" placeholder="Şifre"> <!-- Placeholder Türkçeleştirildi -->
+                <a href="#">Şifrenizi mi unuttunuz?</a> <!-- Link Türkçeleştirildi -->
+                <button type="submit" id="sign-in-button">Giriş Yap</button> <!-- Buton Türkçeleştirildi ve id eklendi -->
+            </form>
+        </div>
+        <div class="toggle-container">
+            <div class="toggle">
+                <div class="toggle-panel toggle-left">
+                    <h1>Tekrar Hoş Geldiniz!</h1> <!-- Başlık Türkçeleştirildi -->
+                    <p>Sitenin tüm özelliklerini kullanmak için kişisel bilgilerinizi girin</p> <!-- Açıklama Türkçeleştirildi -->
+                    <button class="hidden" id="login">Giriş Yap</button> <!-- Buton Türkçeleştirildi -->
+                </div>
+                <div class="toggle-panel toggle-right">
+                    <h1>Merhaba!</h1> <!-- Başlık Türkçeleştirildi -->
+                    <p>Sitenin tüm özelliklerini kullanmak için kişisel bilgilerinizi girin</p> <!-- Açıklama Türkçeleştirildi -->
+                    <button class="hidden" id="register">Kayıt Ol</button> <!-- Buton Türkçeleştirildi -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../js/auth.js"></script> <!-- auth.js dosyasını ekleyin -->
+    <script>
+    const container = document.getElementById('container');
+    const registerBtn = document.getElementById('register');
+    const loginBtn = document.getElementById('login');
+    
+    registerBtn.addEventListener('click', () => {
+        container.classList.add("active");
+    });
+    
+    loginBtn.addEventListener('click', () => {
+        container.classList.remove("active");
+    });
+    
+    </script>
+</body>
+
+</html>

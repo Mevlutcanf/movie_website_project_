@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionBox</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="shortcut icon" type="image/png" href="../icon.png">
+    <style>
+        .movie-details {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        #movie-content {
+            margin-bottom: 40px;
+        }
+
+        #user-features,
+        #reviews-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: block !important; /* Zorla görünür yap */
+        }
+
+        .review {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        #user-comment {
+            width: 100%;
+            min-height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #user-rating {
+            padding: 5px;
+            margin: 10px 0;
+        }
+
+        #submit-review {
+            background-color: #e9202a;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+    <script type="module" src="../js/movieDetails.js"></script>
+</head>
+<body>
+    <header>
+        <h1 style="cursor: pointer;" onclick="handleLogoClick()">VisionBox</h1>
+        <form id="form">
+            <input type="text" class="search" id="search" placeholder="İstediğiniz filmleri arayın" autocomplete="off">
+        </form>
+        <nav>
+            <span id="user-email" style="margin-right: 10px; color: white;"></span>
+            <a href="login.html" id="login-btn" style="margin-right: 10px;">Giriş Yap</a>
+            <a href="#" id="logout-btn" style="margin-right: 10px; display: none;" onclick="handleLogout(event)">Çıkış Yap</a>
+        </nav>
+    </header>
+
+    <main id="movie-details" class="movie-details">
+        <div id="movie-content">
+            <h2 id="movie-title" style="cursor: pointer;" onclick="window.location.href='../guest.html'">Film Detayları</h2>
+            <img id="movie-poster" src="" alt="Film Afişi" style="max-width: 300px; display: block; margin: 0 auto;">
+            <iframe id="movie-trailer" width="560" height="315" src="" frameborder="0" allowfullscreen style="display: block; margin: 20px auto;"></iframe>
+            <p><strong>Çıkış Tarihi:</strong> <span id="release-date">Yükleniyor...</span></p>
+            <p><strong>Puan:</strong> <span id="vote-average">Yükleniyor...</span></p>
+            <p><strong>Genel Bakış:</strong> <span id="overview-text">Yükleniyor...</span></p>
+            <p><strong>Türler:</strong> <span id="genre-list">Yükleniyor...</span></p>
+            <button id="show-more" style="display: none;">Daha Fazla Göster</button>
+        </div>
+
+        <!-- Değerlendirme bölümü -->
+        <div id="reviews-section">
+            <h3>Yorumlar</h3>
+            <!-- Giriş yapmış kullanıcılar için değerlendirme formu -->
+            <div id="user-features">
+                <div class="rating">
+                    <span>Puan Ver: </span>
+                    <select id="user-rating">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5" selected>5</option>
+                      
+                    </select>
+                </div>
+                <textarea id="user-comment" placeholder="Yorumunuzu yazın..."></textarea>
+                <button id="submit-review">Yorum Yap</button>
+            </div>
+
+            <!-- Tüm değerlendirmeler -->
+            <h3>Değerlendirmeler</h3>
+            <div id="reviews-container">
+                <!-- Değerlendirmeler buraya dinamik olarak eklenecek -->
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/movieDetails.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+    <script>
+    const options = {
+      bottom: '64px', // default: '32px'
+      right: '32px', // default: '32px'
+      left: 'unset', // default: 'unset'
+      time: '0.5s', // default: '0.3s'
+      mixColor: '#c9d6ff', // Açık modda görünen renk ile uyumlu olacak şekilde ayarlayın
+      backgroundColor: '#333', // Koyu modda arka plan rengi (isteğinize göre düzenleyin)
+      buttonColorDark: '#100f2c',  // Koyu mod düğme rengi
+      buttonColorLight: '#fff', // Açık mod düğme rengi
+      saveInCookies: true, // Tercihleri saklar
+      label: '🌓', // Buton üzerindeki simge
+      autoMatchOsTheme: false // Otomatik mod değişimi kapalı
+    }
+    
+    const darkmode = new Darkmode(options);
+    darkmode.showWidget();
+
+    // Kullanıcı durumunu kontrol et
+    document.addEventListener('DOMContentLoaded', () => {
+        const userEmail = localStorage.getItem('userEmail');
+        const userFeatures = document.getElementById('user-features');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userEmailSpan = document.getElementById('user-email');
+        const reviewsSection = document.getElementById('reviews-section');
+
+        if (userEmail) {
+            // Kullanıcı giriş yapmışsa
+            if (userFeatures) userFeatures.style.display = 'block';
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (logoutBtn) logoutBtn.style.display = 'inline';
+            if (userEmailSpan) userEmailSpan.textContent = `👋 Hoşgeldin, ${userEmail.split('@')[0]}`;
+            if (reviewsSection) reviewsSection.style.display = 'block';
+        } else {
+            // Kullanıcı giriş yapmamışsa
+            if (userFeatures) userFeatures.style.display = 'none';
+            if (loginBtn) loginBtn.style.display = 'inline';
+            if (logoutBtn) logoutBtn.style.display = 'none';
+            if (userEmailSpan) userEmailSpan.textContent = '';
+            if (reviewsSection) reviewsSection.style.display = 'block';
+        }
+    });
+
+    // Değerlendirme gönderme işlemi
+    document.getElementById('submit-review').addEventListener('click', async () => {
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) {
+            alert('Değerlendirme yapmak için giriş yapmalısınız!');
+            return;
+        }
+
+        const rating = document.getElementById('user-rating').value;
+        const comment = document.getElementById('user-comment').value;
+        const movieId = new URLSearchParams(window.location.search).get('id');
+
+        if (!rating || !comment) {
+            alert('Lütfen hem puan hem de yorum ekleyin!');
+            return;
+        }
+
+        try {
+            // Burada Firebase veya başka bir backend servisi kullanarak değerlendirmeyi kaydedebilirsiniz
+            const review = {
+                movieId,
+                userEmail,
+                rating,
+                comment,
+                timestamp: new Date().toISOString()
+            };
+
+            // Örnek kaydetme işlemi (gerçek implementasyonu sizin backend yapınıza göre değişecektir)
+            await saveReview(review);
+            
+            alert('Değerlendirmeniz başarıyla kaydedildi!');
+            loadReviews(movieId); // Değerlendirmeleri yeniden yükle
+        } catch (error) {
+            console.error('Değerlendirme kaydedilirken hata:', error);
+            alert('Değerlendirme kaydedilirken bir hata oluştu!');
+        }
+    });
+
+    // Logo tıklama işleyicisi
+    function handleLogoClick() {
+        const userEmail = localStorage.getItem('userEmail');
+        if (userEmail) {
+            window.location.href = 'user.html';
+        } else {
+            window.location.href = 'guest.html';
+        }
+    }
+
+    // Kullanıcı durumunu kontrol et
+    document.addEventListener('DOMContentLoaded', () => {
+        const userEmail = localStorage.getItem('userEmail');
+        const userEmailSpan = document.getElementById('user-email');
+        
+        if (userEmail && userEmailSpan) {
+            // E-postanın @ işaretinden önceki kısmını al
+            const username = userEmail.split('@')[0];
+            userEmailSpan.textContent = `👋 Hoşgeldin, ${username}`;
+        }
+    });
+
+    // Çıkış yapma işlemi için yeni fonksiyon
+    async function handleLogout(event) {
+        event.preventDefault();
+        const confirmLogout = confirm('Çıkış yapmak istediğinize emin misiniz?');
+        if (confirmLogout) {
+            try {
+                await auth.signOut();
+                localStorage.removeItem('userEmail');
+                window.location.href = '../html/guest.html';
+            } catch (error) {
+                console.error('Çıkış yapılırken hata:', error);
+            }
+        }
+    }
+
+    // Sayfa yüklendiğinde Firebase auth durumunu kontrol et
+    document.addEventListener('DOMContentLoaded', () => {
+        const auth = getAuth();
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                localStorage.removeItem('userEmail');
+                const userFeatures = document.getElementById('user-features');
+                const loginBtn = document.getElementById('login-btn');
+                const logoutBtn = document.getElementById('logout-btn');
+                const userEmailSpan = document.getElementById('user-email');
+                
+                if (userFeatures) userFeatures.style.display = 'none';
+                if (loginBtn) loginBtn.style.display = 'inline';
+                if (logoutBtn) logoutBtn.style.display = 'none';
+                if (userEmailSpan) userEmailSpan.textContent = '';
+            }
+        });
+    });
+
+    // Kullanıcı durumunu kontrol et ve çıkış butonu event listener ekle
+    document.addEventListener('DOMContentLoaded', () => {
+        const userEmail = localStorage.getItem('userEmail');
+        const userFeatures = document.getElementById('user-features');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userEmailSpan = document.getElementById('user-email');
+        
+        if (userEmail) {
+            // Kullanıcı giriş yapmışsa
+            if (userFeatures) userFeatures.style.display = 'block';
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (logoutBtn) logoutBtn.style.display = 'inline';
+            if (userEmailSpan) userEmailSpan.textContent = `👋 Hoşgeldin, ${userEmail.split('@')[0]}`;
+        } else {
+            // Kullanıcı giriş yapmamışsa
+            if (userFeatures) userFeatures.style.display = 'none';
+            if (loginBtn) loginBtn.style.display = 'inline';
+            if (logoutBtn) logoutBtn.style.display = 'none';
+            if (userEmailSpan) userEmailSpan.textContent = '';
+        }
+
+        // Çıkış butonuna event listener ekle
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', handleLogout);
+        }
+    });
+
+    // Logo tıklama işleyicisi güncellendi
+    function handleLogoClick() {
+        const userEmail = localStorage.getItem('userEmail');
+        window.location.href = userEmail ? 'user.html' : 'guest.html';
+    }
+    </script>
+    
+</body>
+</html>

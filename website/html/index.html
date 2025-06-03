@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionBox</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="shortcut icon" type="image/png" href="../icon.png">
+    <script src="../js/index.js" defer></script>
+</head>
+
+<body>
+    <!-- HEADER -->
+    <header>
+        <h1 style="cursor: pointer;" onclick="window.location.href='index.html'">VisionBox</h1>
+        <form id="form">
+            <input type="text" class="search" id="search" placeholder="İstediğiniz filmleri arayın" autocomplete="on">
+        </form>
+        <nav>
+            <a href="login.html" style="margin-right: 10px;">Giriş Yap / KAyıt Ol</a>
+            
+        </nav>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <div class="main-container">
+        <!-- Sol Taraf: Tür Seçici -->
+        <aside class="genre-selector">
+            <h2>Türler</h2>
+            <ul id="genre-list">
+                <!-- Türler buraya yüklenecek -->
+            </ul>
+        </aside>
+
+        <!-- Orta Kısım: Ana Filmler -->
+        <section class="movies">
+            <h2>Filmler</h2>
+            <div id="main" class="movie-grid">
+                <!-- Filmler burada yüklenecek -->
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button id="prev-page">Önceki Sayfa</button>
+                <span id="current-page">Sayfa: 1</span>
+                <button id="next-page">Sonraki Sayfa</button>
+            </div>
+        </section>
+
+        <!-- Sağ Taraf: Önerilen Filmler -->
+        <aside id="recommended-movies" class="recommended-movies">
+            <h2>Önerilen Filmler</h2>
+            <div id="recommended-list">
+                <!-- Burada önerilen filmler gösterilecek -->
+            </div>
+        </aside>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <h3>VisionBox</h3>
+        <ul>
+            <li><a href="#">Koşullar ve Gizlilik</a></li>
+            <li><a href="#">Geri Bildirimde Bulunun</a></li>
+            <li><a href="#">Çerez Politikası</a></li>
+            <li><a href="#">Yardım</a></li>
+        </ul>
+        <small>© 2024 Haklarınız Saklıdır.</small>
+        <small>© 2024 BU SİTE PROJE AMAÇLI MEVLÜT FINDIK TARAFINDAN YAPILMIŞTIR.</small>
+    </footer>
+
+    <!-- DARK MODE TOGGLE -->
+    <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+    <script>
+        const options = {
+            bottom: '64px',
+            right: '32px',
+            time: '0.5s',
+            mixColor: '#c9d6ff',
+            backgroundColor: '#333',
+            buttonColorDark: '#100f2c',
+            buttonColorLight: '#fff',
+            saveInCookies: true,
+            label: '🌓',
+            autoMatchOsTheme: false
+        };
+        const darkmode = new Darkmode(options);
+        darkmode.showWidget();
+    </script>
+</body>
+
+</html>

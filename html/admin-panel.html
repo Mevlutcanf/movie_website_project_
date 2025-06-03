@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Paneli - VisionBox</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="shortcut icon" type="image/png" href="../icon.png">
+    <script src="../js/index.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+    <!-- Font preloading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    
+    <!-- Firebase modülleri -->
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+    
+    <!-- Admin panel JavaScript -->
+    <script type="module" src="../js/admin.js"></script>
+</head>
+
+<body>
+    <!-- HEADER -->
+    <header>
+        <h1 style="cursor: pointer;" onclick="handleLogoClick()">VisionBox - Admin Panel</h1>
+        <nav>
+            <a href="admin.html" style="margin-right: 10px;">Ana Sayfa</a>
+            <span id="admin-email" style="margin-right: 10px; color: white;">👑 Admin Panel</span>
+            <a href="guest.html" style="margin-right: 10px;" id="logout-btn" onclick="handleLogout(event)">Çıkış Yap</a>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <div class="main-container">
+        <!-- Admin İşlemleri -->
+        <section class="admin-actions">
+            <div class="action-card">
+                <h2>🎬 Film Ekle</h2>
+                <form id="add-film-form">
+                    <label for="film-title">Film Adı:</label>
+                    <input type="text" id="film-title" placeholder="Film adı" required>
+                    <label for="film-genre">Film Türü:</label>
+                    <input type="text" id="film-genre" placeholder="Film türü" required>
+                    <label for="film-year">Yıl:</label>
+                    <input type="number" id="film-year" placeholder="Yıl" required>
+                    <label for="film-description">Açıklama:</label>
+                    <textarea id="film-description" placeholder="Film açıklaması" required></textarea>
+                    <button type="submit">Film Ekle</button>
+                </form>
+            </div>
+
+            <div class="action-card">
+                <h2>🗑️ Film Sil</h2>
+                <form id="delete-film-form">
+                    <label for="film-id">Film ID:</label>
+                    <input type="text" id="film-id" placeholder="Film ID" required>
+                    <button type="submit">Film Sil</button>
+                </form>
+            </div>
+
+            <div class="action-card">
+                <h2>👥 Kullanıcı Yönetimi</h2>
+                <div id="user-list">
+                    <!-- Kullanıcılar burada listelenecek -->
+                </div>
+            </div>
+
+            <div class="action-card">
+                <h2>📝 Yorum Yönetimi</h2>
+                <div id="review-list">
+                    <!-- Yorumlar burada listelenecek -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <h3>VisionBox</h3>
+        <ul>
+            <li><a href="#">Koşullar ve Gizlilik</a></li>
+            <li><a href="#">Geri Bildirimde Bulunun</a></li>
+            <li><a href="#">Çerez Politikası</a></li>
+            <li><a href="#">Yardım</a></li>
+        </ul>
+        <small>© 2024 Haklarınız Saklıdır.</small>
+        <small>© 2024 BU SİTE PROJE AMAÇLI MEVLÜT FINDIK TARAFINDAN YAPILMIŞTIR.</small>
+    </footer>
+
+    <!-- DARK MODE TOGGLE -->
+    <script>
+        // Dark mode ayarları
+        const options = {
+            bottom: '64px',
+            right: '32px',
+            time: '0.5s',
+            mixColor: '#c9d6ff',
+            backgroundColor: '#333',
+            buttonColorDark: '#100f2c',
+            buttonColorLight: '#fff',
+            saveInCookies: true,
+            label: '🌓',
+            autoMatchOsTheme: false
+        };
+        
+        const darkmode = new Darkmode(options);
+        darkmode.showWidget();
+
+        // Kullanıcı durumu kontrolü (Admin kontrolü)
+        document.addEventListener('DOMContentLoaded', () => {
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (!userEmail || userEmail !== 'admin@mail.com') {
+                alert('Bu sayfaya erişim yetkiniz yok!');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Admin bilgisini göster
+            const adminEmailElement = document.getElementById('admin-email');
+            if (adminEmailElement) {
+                adminEmailElement.textContent = `👑 Admin: ${userEmail.split('@')[0]}`;
+            }
+        });
+
+        // Çıkış yapma işlemi güncellendi
+        async function handleLogout(event) {
+            event.preventDefault();
+            if (confirm('Çıkış yapmak istediğinize emin misiniz?')) {
+                try {
+                    const auth = firebase.auth();
+                    await auth.signOut();
+                    // localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // Firebase auth state'ini sıfırla
+                    await auth.updateCurrentUser(null);
+                    
+                    console.log('Çıkış yapıldı, tüm oturum verileri temizlendi');
+                    window.location.href = 'guest.html';
+                } catch (error) {
+                    console.error("Çıkış hatası:", error);
+                    alert('Çıkış yapılırken bir hata oluştu');
+                }
+            }
+        }
+
+        // Logo tıklama işleyicisini güncelle
+        // function handleLogoClick() {
+        //     const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        //     if (isAdmin) {
+        //         window.location.href = 'admin-panel.html';
+        //     } else {
+        //         window.location.href = 'guest.html';
+        //     }
+        // }
+
+        // Film ekleme işlemi
+        document.getElementById('add-film-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const title = document.getElementById('film-title').value;
+            const genre = document.getElementById('film-genre').value;
+            const year = document.getElementById('film-year').value;
+            const description = document.getElementById('film-description').value;
+
+            // API veya veritabanına film ekleme işlemi yapılacak
+            alert(`Film "${title}" başarıyla eklendi!`);
+        });
+
+        // Film silme işlemi
+        document.getElementById('delete-film-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const filmId = document.getElementById('film-id').value;
+
+            // API veya veritabanından film silme işlemi yapılacak
+            alert(`Film ID: ${filmId} başarıyla silindi!`);
+        });
+
+        // Kullanıcıları listeleme
+        function loadUsers() {
+            const userList = document.getElementById('user-list');
+            // API veya veritabanından kullanıcı verilerini alıp buraya ekleyin
+            const users = ['user1@example.com', 'user2@example.com', 'user3@example.com']; // Örnek kullanıcılar
+
+            users.forEach(user => {
+                const userDiv = document.createElement('div');
+                userDiv.textContent = user;
+                userList.appendChild(userDiv);
+            });
+        }
+
+        loadUsers(); // Kullanıcıları sayfa yüklendiğinde listele
+    </script>
+<style>/* Genel Sayfa Ayarları */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 0;
+    }
+    
+    header {
+        background-color: #333;
+        color: white;
+        padding: 20px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 18px;
+    }
+    
+    header h1 {
+        font-size: 28px;
+        cursor: pointer;
+    }
+    
+    nav a {
+        color: white;
+        text-decoration: none;
+        margin-right: 20px;
+    }
+    
+    nav a:hover {
+        text-decoration: underline;
+    }
+    
+    /* Ana Konteyner */
+    .main-container {
+        display: flex;
+        padding: 20px;
+        justify-content: space-between;
+    }
+    
+    .admin-actions {
+        width: 65%;
+    }
+    
+    .action-card {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .action-card h2 {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 10px;
+    }
+    
+    label {
+        font-size: 16px;
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+    }
+    
+    input[type="text"],
+    input[type="number"],
+    textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    
+    textarea {
+        resize: vertical;
+        height: 100px;
+    }
+    
+    button {
+        background-color: #333;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    button:hover {
+        background-color: #444;
+    }
+    
+    /* Kullanıcı Listeleme */
+    #user-list {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    #user-list div {
+        padding: 8px 0;
+        border-bottom: 1px solid #ddd;
+        font-size: 16px;
+        color: #555;
+    }
+    
+    #user-list div:last-child {
+        border-bottom: none;
+    }
+    
+    /* Footer */
+    footer {
+        background-color: #333;
+        color: white;
+        padding: 20px 40px;
+        text-align: center;
+        font-size: 14px;
+    }
+    
+    footer ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    footer ul li {
+        display: inline;
+        margin: 0 10px;
+    }
+    
+    footer ul li a {
+        color: white;
+        text-decoration: none;
+    }
+    
+    footer ul li a:hover {
+        text-decoration: underline;
+    }
+    
+    footer small {
+        display: block;
+        margin-top: 10px;
+    }
+    
+    /* Dark Mode */
+    body[data-theme='dark'] {
+        background-color: #121212;
+        color: white;
+    }
+    
+    body[data-theme='dark'] header {
+        background-color: #222;
+    }
+    
+    body[data-theme='dark'] .action-card {
+        background-color: #333;
+        color: white;
+    }
+    
+    body[data-theme='dark'] .action-card h2 {
+        border-bottom: 2px solid #444;
+    }
+    
+    body[data-theme='dark'] input,
+    body[data-theme='dark'] textarea,
+    body[data-theme='dark'] button {
+        background-color: #444;
+        color: white;
+        border-color: #555;
+    }
+    
+    body[data-theme='dark'] input[type="text"],
+    body[data-theme='dark'] input[type="number"],
+    body[data-theme='dark'] textarea {
+        color: white;
+    }
+    
+    body[data-theme='dark'] footer {
+        background-color: #222;
+    }
+    
+    body[data-theme='dark'] footer ul li a {
+        color: #ddd;
+    }
+    
+    /* Responsive Tasarım */
+    @media (max-width: 768px) {
+        .main-container {
+            flex-direction: column;
+            align-items: center;
+        }
+    
+        .admin-actions {
+            width: 100%;
+        }
+    
+        .action-card {
+            width: 90%;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        header {
+            padding: 10px 20px;
+        }
+    
+        header h1 {
+            font-size: 24px;
+        }
+    
+        .action-card h2 {
+            font-size: 20px;
+        }
+    
+        button {
+            font-size: 14px;
+            padding: 8px 15px;
+        }
+    }
+    </style>
+
+
+
+</body>
+
+</html>

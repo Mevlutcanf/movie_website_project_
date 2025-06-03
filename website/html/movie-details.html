@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionBox</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="shortcut icon" type="image/png" href="../icon.png">
+</head>
+<body>
+    <header>
+        <h1 style="cursor: pointer;" onclick="window.location.href='index.html'">VisionBox</h1>
+        <form id="form">
+            <input type="text" class="search" id="search" placeholder="İstediğiniz filmleri arayın" autocomplete="off">
+        </form>
+        <nav>
+            <!-- Giriş ve Kayıt Ol linkleri -->
+            <a href="login.html" style="margin-right: 10px;">Giriş Yap</a>
+            <a href="register.html" style="margin-right: 10px;">Kayıt Ol</a>
+        </nav>
+    </header>
+
+    <main id="movie-details" class="movie-details">
+        <h2 id="movie-title" style="cursor: pointer;" onclick="window.location.href='../index.html'">Film Detayları</h2>
+        <img id="movie-poster" src="" alt="Film Afişi" style="max-width: 300px; display: block; margin: 0 auto;">
+        <iframe id="movie-trailer" width="560" height="315" src="" frameborder="0" allowfullscreen style="display: block; margin: 20px auto;"></iframe>
+        <p><strong>Çıkış Tarihi:</strong> <span id="release-date">Yükleniyor...</span></p>
+        <p><strong>Puan:</strong> <span id="vote-average">Yükleniyor...</span></p>
+        <p><strong>Genel Bakış:</strong> <span id="overview-text">Yükleniyor...</span></p>
+        <button id="show-more" style="display: none;">Daha Fazla Göster</button>
+    </main>
+
+    <script src="../js/movieDetails.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+    <script>
+    const options = {
+      bottom: '64px', // default: '32px'
+      right: '32px', // default: '32px'
+      left: 'unset', // default: 'unset'
+      time: '0.5s', // default: '0.3s'
+      mixColor: '#c9d6ff', // Açık modda görünen renk ile uyumlu olacak şekilde ayarlayın
+      backgroundColor: '#333', // Koyu modda arka plan rengi (isteğinize göre düzenleyin)
+      buttonColorDark: '#100f2c',  // Koyu mod düğme rengi
+      buttonColorLight: '#fff', // Açık mod düğme rengi
+      saveInCookies: true, // Tercihleri saklar
+      label: '🌓', // Buton üzerindeki simge
+      autoMatchOsTheme: false // Otomatik mod değişimi kapalı
+    }
+    
+    const darkmode = new Darkmode(options);
+    darkmode.showWidget();
+    </script>
+    
+</body>
+</html>
